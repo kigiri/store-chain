@@ -1,4 +1,6 @@
-Allow to bind data on promise chain.
+Allow to bind data on a promise chain.
+
+[![Build Status](https://travis-ci.org/kigiri/store-chain.svg)](https://travis-ci.org/kigiri/store-chain)
 
 ``` javascript
 // usage exemple
