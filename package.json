@@ -1,10 +1,10 @@
 {
   "name": "store-chain",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "\"Allow to bind data  on promise chain\"",
   "main": "index.js",
   "scripts": {
-    "test": "node ./test.js | tap-dot"
+    "test": "node test"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,6 @@
   "author": "Clement Denis",
   "license": "ISC",
   "devDependencies": {
-    "tap-dot": "^1.0.1",
     "tape": "^4.2.2"
   }
 }
