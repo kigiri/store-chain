@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@git.payname.tools:npm/store-chain.git"
+    "url": "https://github.com/kigiri/store-chain.git"
   },
   "keywords": [
     "promise",
