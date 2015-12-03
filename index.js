@@ -20,7 +20,9 @@ function storeChainFactory(ref, q) {
 
   function getter(key) {
     return function storeChainGetter(fn) {
-      return $.then(function () { fn(store[key]) });
+      return $.then(function recur(arg) {
+        return looksLikeAPromise(arg) ? arg.then(recur) : fn(store[key]);
+      });
     };
   }
 
@@ -67,7 +69,9 @@ function storeChainFactory(ref, q) {
     }
     ref = ref.then(passed);
     $.get[key] = getter(key);
-    return $.then(function prepareGetter(value) { return store[key] = value });
+    return $.then(function recur(value) {
+      return looksLikeAPromise(value) ? value.then(recur) : store[key] = value;
+    });
   };
 
   if (!looksLikeAPromise(ref)) {

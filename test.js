@@ -7,8 +7,14 @@ var chain = require('./index');
 
 var restrictedKeys = require('./restricted-keys');
 
+function delayedReturnValue(value) {
+  return new Promise(function (resolve) {
+    setTimeout(function () { resolve(value) }, 1500)
+  });
+}
+
 test('set, get, del and override', function(t) {
-  t.plan(4);
+  t.plan(5);
   chain()
     .set("test", function () { return "all good" })
     .get.test(function (value) { t.equal(value, "all good") })
@@ -17,7 +23,9 @@ test('set, get, del and override', function(t) {
     .del("test")
     .set("test", function () { return "overrided" })
     .get.test(function (value) { t.equal(value, "overrided") })
-    .get(function (store) { t.equal(store.test, "overrided") });
+    .get(function (store) { t.equal(store.test, "overrided") })
+    .set("delayed", function() { return delayedReturnValue("delayed") })
+    .get.delayed(function (delayed) { t.equal(delayed, "delayed")});
 });
 
 test('prevent override restricted keys', function (t) {
