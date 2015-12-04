@@ -14,7 +14,7 @@ function delayedReturnValue(value) {
 }
 
 test('set, get, del and override', function(t) {
-  t.plan(5);
+  t.plan(6);
   chain()
     .set("test", function () { return "all good" })
     .get.test(function (value) { t.equal(value, "all good") })
@@ -25,7 +25,11 @@ test('set, get, del and override', function(t) {
     .get.test(function (value) { t.equal(value, "overrided") })
     .get(function (store) { t.equal(store.test, "overrided") })
     .set("delayed", function() { return delayedReturnValue("delayed") })
-    .get.delayed(function (delayed) { t.equal(delayed, "delayed")});
+    .get.delayed(function (delayed) { t.equal(delayed, "delayed") })
+    .get(function (store) { return delayedReturnValue(store) })
+    .then(function (store) {
+      t.deepEqual(Object.keys(store), ["test", "delayed"]);
+    });
 });
 
 test('prevent override restricted keys', function (t) {

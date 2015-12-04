@@ -46,7 +46,7 @@ function storeChainFactory(ref, q) {
   };
 
   $.get = function defaultStoreChainGetter(fn) {
-    return $.then(function () { fn(store) });
+    return $.then(function () { return fn(store) });
   };
 
   $.del = function storeChainDel(key) {

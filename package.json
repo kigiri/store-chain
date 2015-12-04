@@ -1,7 +1,7 @@
 {
   "name": "store-chain",
-  "version": "1.0.3",
-  "description": "\"Allow to bind data  on promise chain\"",
+  "version": "1.0.4",
+  "description": "\"Allow to bind data on a promise chain\"",
   "main": "index.js",
   "scripts": {
     "test": "node test"
