@@ -4,13 +4,6 @@ function looksLikeAPromise(val) {
   return val && isFn(val.then) && isFn(val.catch);
 }
 
-function logErrorStack(err) {
-  if (typeof err === "string") {
-    err = new Error(err);
-  }
-  console.warn(err.stack);
-}
-
 function StoreChain(store, ref) {
   return {
     then: function (success, failure) {
@@ -42,23 +35,57 @@ function StoreChain(store, ref) {
   }
 }
 
-function storeChainConstructor(ref, store) {
-  if (!looksLikeAPromise(ref)) {
-    if (ref && isFn(ref.resolve)) {
-      ref = ref.resolve();
-    } else if (Promise !== undefined) {
-      ref = Promise.resolve();
-    } else {
-      logErrorStack("Unable to find Promise library, "
-        +"you must init StoreChain with a promise.\n"
-        +"Use `Promise.resolve()` to create one from scratch");
-    }
-  }
-
-  return StoreChain(store || {}, ref);
+function constructLocalStore(source) {
+  var target = {};
+  return StoreChain(target, objectPromiseAll(source, target));
 }
 
-storeChainConstructor.debug = function (fn) {
+function storeChainConstructor(ref) {
+  if (!ref) {
+    return StoreChain({}, Promise.resolve());
+  }
+  if (looksLikeAPromise(ref)) {
+    return StoreChain({}, ref);
+  }
+  if (isFn(ref) && isFn(ref.resolve)) {
+    return StoreChain({}, ref.resolve());
+  }
+  return constructLocalStore(ref);
+}
+
+function objectPromiseAll(obj, store) {
+  store || (store = {})
+  var keys = Object.keys(obj);
+  var max = keys.length;
+  var work = new Array(max);
+  var i = -1;
+
+  while (++i < max) {
+    work[i] = obj[keys[i]];
+  }
+
+  return Promise.all(work).then(function (result) {
+    i = -1;
+
+    while (++i < max) {
+      store[keys[i]] = result[i];
+    }
+    return store;
+  })
+}
+
+function polymorphicPromiseAll(collection) {
+  if (!collection) {
+    throw new Error('polymorphicPromiseAll need to be called with '
+      +'an iterable or an object');
+  }
+  if (collection.constructor === Array) {
+    return Promise.all(collection);
+  }
+  return objectPromiseAll(collection);
+}
+
+storeChainConstructor.debug = function promiseDebug(fn) {
   var stack = (new Error('debug')).stack.split('\n');
   var origin = stack[2].split(/\((.+)\)/)[1];
   var originMessage = 'Debug from '+ origin +'\n';
@@ -82,39 +109,7 @@ storeChainConstructor.debug = function (fn) {
   }
 }
 
-function objectPromiseAll(obj) {
-  var keys = Object.keys(obj);
-  var max = keys.length;
-  var work = new Array(max);
-  var i = -1;
-
-  while (++i < max) {
-    work[i] = obj[keys[i]];
-  }
-
-  return Promise.all(work).then(function (result) {
-    var store = {};
-    i = -1;
-
-    while (++i < max) {
-      store[keys[i]] = result[i];
-    }
-
-    return store;
-  })
-}
-
-storeChainConstructor.all = function polymorphicPromiseAll(collection) {
-  if (!collection) {
-    throw new Error('polymorphicPromiseAll need to be called with '
-      +'an iterable or an object');
-  }
-  if (collection.constructor === Array) {
-    return Promise.all(collection);
-  }
-  return objectPromiseAll(collection);
-}
-
+storeChainConstructor.all = objectPromiseAll
 storeChainConstructor.looksLikeAPromise = looksLikeAPromise;
 
 module.exports = storeChainConstructor;
