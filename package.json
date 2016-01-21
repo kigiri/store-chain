@@ -1,6 +1,6 @@
 {
   "name": "store-chain",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "\"Allow to bind data on a promise chain\"",
   "main": "index.js",
   "scripts": {

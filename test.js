@@ -5,39 +5,43 @@ console.warn = function noop() {};
 
 var chain = require('./index');
 
-var restrictedKeys = require('./restricted-keys');
-
 function delayedReturnValue(value) {
   return new Promise(function (resolve) {
-    setTimeout(function () { resolve(value) }, 1500)
+    setTimeout(function () { resolve(value) }, 15)
   });
 }
 
 test('set, get, del and override', function(t) {
   t.plan(6);
   chain()
-    .set("test", function () { return "all good" })
-    .get.test(function (value) { t.equal(value, "all good") })
-    .set("test", function () { return "should not override" })
-    .get.test(function (value) { t.equal(value, "all good") })
+    .then(function () { return "all good" })
+    .set("test")
+    .get(function (store) { t.equal(store.test, "all good") })
+    .then(function () { return "should override" })
+    .set("test")
+    .get(function (store) { t.equal(store.test, "should override") })
     .del("test")
-    .set("test", function () { return "overrided" })
-    .get.test(function (value) { t.equal(value, "overrided") })
-    .get(function (store) { t.equal(store.test, "overrided") })
-    .set("delayed", function() { return delayedReturnValue("delayed") })
-    .get.delayed(function (delayed) { t.equal(delayed, "delayed") })
+    .get(function (store) { t.equal(store.test, undefined) })
+    .then(function() { return delayedReturnValue("delayed") })
+    .set('delayed')
+    .then(function () { throw new Error('oops') })
+    .catch(function (err, store) {
+      t.equal(err.message, 'oops');
+      t.equal(store.delayed, 'delayed');
+    })
     .get(function (store) { return delayedReturnValue(store) })
     .then(function (store) {
-      t.deepEqual(Object.keys(store), ["test", "delayed"]);
+      t.deepEqual(Object.keys(store), [ "delayed" ]);
     });
 });
 
-test('prevent override restricted keys', function (t) {
-  t.plan(restrictedKeys.length);
-
-  restrictedKeys.forEach(function testRestrictedKey(key) {
-    var ref = chain()
-      .set(key, function () { return "pouet" })
-      .then(function newValue(now) { t.notEqual(ref.get[key], "pouet") });
+test('polymorphic all', function(t) {
+  t.plan(2);
+  chain.all({
+    a: 'kiliman',
+    b: delayedReturnValue('kirikou'),
+  }).then(function (store) {
+    t.equal(store.a, 'kiliman');
+    t.equal(store.b, 'kirikou');
   })
 })
