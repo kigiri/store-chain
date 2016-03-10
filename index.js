@@ -27,9 +27,13 @@ function StoreChain(store, ref) {
       return StoreChain(store, ref.then(deleter));
     },
     get: function (success, failure) {
-      function getter() { return store }
+      if (!isFn(success)) {
+        success = function getStore() { return store }
+      }
 
-      return StoreChain(store, ref.then(getter).then(success, failure));
+      function getter() { return success(store) }
+
+      return StoreChain(store, ref.then(getter, failure));
     },
     toPromise: function () { return ref }
   }

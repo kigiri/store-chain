@@ -11,7 +11,7 @@ function delayedReturnValue(value) {
   })
 }
 
-test('set, get, del and override', function(t) {
+test('set, get, del and override', function (t) {
   t.plan(6)
   chain()
     .then(function () { return "all good" })
@@ -35,7 +35,7 @@ test('set, get, del and override', function(t) {
     })
 })
 
-test('init chain from an object containing promises', function(t) {
+test('init chain from an object containing promises', function (t) {
   t.plan(2)
   chain({
     a: 'kiliman',
@@ -47,7 +47,7 @@ test('init chain from an object containing promises', function(t) {
   })
 })
 
-test('init chain from a promise', function(t) {
+test('init chain from a promise', function (t) {
   var noval;
 
   t.plan(1)
@@ -55,7 +55,7 @@ test('init chain from a promise', function(t) {
   .then(function () { t.equal(noval, 'solved') })
 })
 
-test('polymorphic all', function(t) {
+test('polymorphic all', function (t) {
   t.plan(2)
   chain.all({
     a: 'kiliman',
@@ -64,4 +64,20 @@ test('polymorphic all', function(t) {
     t.equal(store.a, 'kiliman')
     t.equal(store.b, 'kirikou')
   })
+})
+
+test('Check error transmission', function (t) {
+  t.plan(1)
+  chain({ msg: Promise.resolve('boom boom boom') })
+    .get(function (s) { return Promise.reject(new Error(s.msg)) })
+    .get(function () { t.equal('should not be called', true) })
+    .catch(function (err) { t.equal(err.message, 'boom boom boom') })
+})
+
+test('empty get should return the store', function (t) {
+  t.plan(1)
+  return chain({ a: 'lol' })
+    .get()
+    .then(function (s) { t.equal(s.a, 'lol') })
+
 })
