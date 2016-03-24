@@ -76,8 +76,18 @@ test('Check error transmission', function (t) {
 
 test('empty get should return the store', function (t) {
   t.plan(1)
-  return chain({ a: 'lol' })
+  chain({ a: 'lol' })
     .get()
     .then(function (s) { t.equal(s.a, 'lol') })
 
+})
+
+test('catch should return the value to the chain', function (t) {
+  t.plan(1)
+
+  chain()
+    .then(function () { return Promise.reject(new Error("pouet")) })
+    .catch(function () { return 'pouet' })
+    .set('p')
+    .get(function (s) { t.equal(s.p, 'pouet') })
 })

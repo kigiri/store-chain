@@ -12,7 +12,7 @@ function StoreChain(store, ref) {
     catch: function (failure) {
       function catcher(err) {
         if (!isFn(failure)) throw err;
-        failure(err, store);
+        return failure(err, store);
       }
       return StoreChain(store, ref.catch(catcher));
     },
